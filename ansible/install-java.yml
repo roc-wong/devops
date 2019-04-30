@@ -1,0 +1,39 @@
+---
+- hosts: condition
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Install packages unzip/vim/net-tools
+    yum:
+      name: ['vim', 'unzip', 'net-tools']
+      state: latest
+
+  - name: Copy jdk to remote hosts.
+    copy:
+      src: /root/roc/java/jdk1.8.0_91.tar.gz
+      dest: /tmp/jdk1.8.0_91.tar.gz
+      owner: root
+      group: root
+
+  - name: Copy java.sh to remote hosts.
+    copy:
+      src: /root/roc/java/java.sh
+      dest: /etc/profile.d/java.sh
+      owner: root
+      group: root
+
+  - name: Unarchive a file that is already on the remote machine
+    unarchive:
+      src: /tmp/jdk1.8.0_91.tar.gz
+      dest: /usr/local/
+      remote_src: yes
+
+  - name: ln jdk1.8.0_91 to jdk
+    file:
+      src: /usr/local/jdk1.8.0_91
+      dest: /usr/local/jdk
+      state: link
+      remote_src: yes
+
+  - name: java_env
+    shell: source /etc/profile
