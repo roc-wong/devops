@@ -1,0 +1,15 @@
+---
+- hosts: all-server
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Is docker installed ?
+    shell: docker --version
+    register: docker_version
+
+  - name: echo docker version
+    debug:
+      msg: "{{docker_version}}"

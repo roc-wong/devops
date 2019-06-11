@@ -1,0 +1,30 @@
+---
+- hosts: all-server
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy jmeter source to remote hosts.
+    copy:
+      src: /root/roc/apache-jmeter-5.1.1.zip
+      dest: /usr/local/apache-jmeter-5.1.1.zip
+      owner: root
+      group: root
+
+  - name: Unarchive a file that is already on the remote machine
+    unarchive:
+      src: /usr/local/apache-jmeter-5.1.1.zip
+      dest: /usr/local/
+      remote_src: yes
+
+  - name: Copy jmeter.sh to remote hosts.
+    copy:
+      src: /root/roc/jmeter.sh
+      dest: /etc/profile.d/jmeter.sh
+      owner: root
+      group: root
+
+  - name: enable /etc/profile
+    shell: source /etc/profile

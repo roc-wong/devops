@@ -1,0 +1,10 @@
+---
+- hosts: all-server
+  gather_facts: no
+
+  tasks:
+
+  - name: install ssh key
+    authorized_key: user=mds
+                    key="{{ lookup('file', '/mds/.ssh/id_rsa.pub') }}"
+                    state=present

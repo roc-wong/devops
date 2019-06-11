@@ -1,0 +1,23 @@
+---
+- hosts: all-server
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy docker-compose to remote hosts.
+    copy:
+      src: /home/mds/roc/docker/docker-compose
+      dest: /usr/bin/docker-compose
+      owner: root
+      group: root
+      mode: 0777
+
+  - name: test docker-compose
+    shell: docker-compose --version
+    register: dc_version
+
+  - name: echo dc version
+    debug:
+      msg: "{{dc_version}}"

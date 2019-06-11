@@ -1,0 +1,89 @@
+---
+- hosts: test-docker
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Is docker installed ?
+    shell: command -v docker
+    register: docker_installed
+    ignore_errors: True
+
+  - name: Is docker compose installed ?
+    shell: command -v docker-compose
+    register: docker_compose_installed
+    ignore_errors: True
+
+  - name: Is docker daemon.json existed?
+    shell: test -e /etc/docker/daemon.json
+    register: daemon_file_existed
+    ignore_errors: True
+
+  - name: Install createrepo.
+    when: docker_installed.rc == 1
+    shell: yum install -y createrepo yum-utils device-mapper-persistent-data lvm2
+
+  - name: Copy docker-ce to remote hosts.
+    when: docker_installed.rc == 1
+    copy:
+      src: /root/roc/docker-ce
+      dest: /root
+      owner: root
+      group: root
+
+  - name: Copy docker.repo to /etc/yum.repos.d on remote host.
+    when: docker_installed.rc == 1
+    copy:
+      src: /root/docker-ce/docker.repo
+      dest: /etc/yum.repos.d/
+      owner: root
+      group: root
+      remote_src: yes
+
+  - name: Copy docker-compose to /usr/bin on remote host.
+    when: docker_compose_installed.rc == 1
+    copy:
+      src: /root/docker-ce/docker-compose
+      dest: /usr/bin/docker-compose
+      owner: root
+      group: root
+      remote_src: yes
+      mode: 0777
+
+  - name: Copy daemon.json to /etc/docker/daemon.json.
+    when: daemon_file_existed.rc == 1
+    copy:
+      src: /root/roc/docker-ce/daemon.json
+      dest: /etc/docker/
+      owner: root
+      group: root
+
+  - name: Install docker.
+    when: docker_installed.rc == 1
+    shell: createrepo -d /root/docker-ce/ && yum clean all && yum makecache && yum install -y docker-ce
+
+  - name: Validate install result?
+    shell: command -v docker
+    register: is_docker_installed
+    ignore_errors: True
+
+  - name: Echo docker version.
+    debug:
+      msg: "{{is_docker_installed}}"
+
+  - name: Validate docker compose install?
+    shell: command -v docker-compose
+    register: is_docker_compose_installed
+    ignore_errors: True
+
+  - name: Echo docker-compose version.
+    debug:
+      msg: "{{is_docker_compose_installed}}"
+
+  - name: clean offline docker yum repository and rebuild docker office docker-ce.repo.
+    shell: rm -rf /etc/yum.repos.d/docker.repo && yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && yum clean all && yum makecache
+
+  - name: restart docker service
+    shell: systemctl restart docker

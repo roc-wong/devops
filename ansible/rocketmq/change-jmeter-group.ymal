@@ -1,0 +1,16 @@
+---
+- hosts: rocketmq-stress-test
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: change jmeter dir group.
+    shell: chown -R mds:mds /usr/local/apache-jmeter-5.1.1
+
+  - name: delete jmeter-server.log in /home/mds/
+    shell: rm -rf /home/mds/jmeter-server.log
+
+  - name: shutdown jmeter-server
+    shell: ps -ef | grep jmeter-server | grep -v grep | awk '{print $2}' | xargs -t -r kill -9

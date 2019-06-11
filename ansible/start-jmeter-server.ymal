@@ -1,0 +1,14 @@
+---
+- hosts: condition-stress-test
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy start-jmeter.sh to remote hosts
+    copy:
+      src: /root/roc/ansible/playbook/start-jmeter.sh
+      dest: /root/start-jmeter.sh
+      owner: root
+      group: root
+      mode: 0777
+  - name: start jmeter server
+    shell: 'source /etc/profile && sh /root/start-jmeter.sh'
