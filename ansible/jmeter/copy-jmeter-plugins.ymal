@@ -1,0 +1,17 @@
+---
+- hosts: 10.29.183.100
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy start-jmeter.sh to remote hosts
+    copy:
+      src: /root/roc/ansible/playbook/jmeter/plugins/standartSet.tar.gz
+      dest: $JMETER_HOME/lib/ext/standartSet.tar.gz
+      owner: root
+      group: root
+      mode: 0777
+  - name: Unarchive standartSet plugins
+    unarchive:
+      src: $JMETER_HOME/lib/ext/standartSet.tar.gz
+      dest: $JMETER_HOME/lib/ext/
+      remote_src: yes

@@ -1,0 +1,7 @@
+---
+- hosts: rocketmq-stress-test
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: stop jmeter server
+    shell: "ps -ef | grep java | grep jmeter | grep -v grep | awk '{print $2}' | xargs -t -r kill -9"

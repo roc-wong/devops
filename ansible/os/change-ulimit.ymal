@@ -1,0 +1,21 @@
+---
+- hosts: all-server
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: print current open files
+    shell: ulimit -n
+    register: result
+    ignore_errors: True
+
+  - name: echo ulimit
+    debug:
+      msg: "{{result}}"
+
+#  - name: change it to 65525 if possible
+#    when: result.stdout == "1024"
+#    shell: echo "* hard nofile 655350" >> /etc/security/limits.conf && echo "* soft nofile 655350"
+#>>/etc/security/limits.conf

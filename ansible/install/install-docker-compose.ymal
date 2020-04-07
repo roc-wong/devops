@@ -6,17 +6,39 @@
   gather_facts: no
   remote_user: root
   tasks:
+  - name: Is docker-compose existed?
+    shell: docker-compose --version
+    register: docker_compose_existed
+    ignore_errors: True
+
+  - name: Is docker daemon.json existed?
+    shell: test -e /etc/docker/daemon.json
+    register: daemon_file_existed
+    ignore_errors: True
+
   - name: Copy docker-compose to remote hosts.
+    when: docker_compose_existed.rc != 0
     copy:
-      src: /home/mds/roc/docker/docker-compose
+      src: /root/roc/ansible/playbook/install/docker-compose
       dest: /usr/bin/docker-compose
       owner: root
       group: root
       mode: 0777
 
+  - name: Copy daemon.json to /etc/docker/daemon.json.
+    when: daemon_file_existed.rc != 0
+    copy:
+      src: /etc/docker/daemon.json
+      dest: /etc/docker/daemon.json
+      owner: root
+      group: root
+
   - name: test docker-compose
     shell: docker-compose --version
     register: dc_version
+
+  - name: restart docker service and login harbor
+    shell: systemctl restart docker && docker login --username=roc.wong 10.29.139.47:5001 --password ROCwong666666
 
   - name: echo dc version
     debug:

@@ -1,0 +1,32 @@
+---
+- hosts: 10.29.183.64
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: whether zabbix installed?
+    shell: cat /etc/zabbix/zabbix_agentd.conf
+    register: zabbix_installed
+    ignore_errors: True
+
+  - name: Copy zabbix agent to remote hosts.
+    when: zabbix_installed.rc != 0
+    copy:
+      src: /opt/zabbix/zabbix-agent-3.4.14-1.el7.x86_64.rpm
+      dest: /opt/zabbix-agent-3.4.14-1.el7.x86_64.rpm
+      owner: root
+      group: root
+
+  - name: install zabbix
+    when: zabbix_installed.rc != 0
+    shell: rpm -ivh /opt/zabbix-agent-3.4.14-1.el7.x86_64.rpm
+
+  - name: replcat server ip and host ip
+    when: zabbix_installed.rc != 0
+    shell: sed -i '97s/127.0.0.1/10.29.182.164/g' /etc/zabbix/zabbix_agentd.conf && sed -i '138s/127.0.0.1/10.29.182.164/g' /etc/zabbix/zabbix_agentd.conf && sed -i "149s/Zabbix server/{{inventory_hostname}}/g" /etc/zabbix/zabbix_agentd.conf
+
+  - name: restart and enable zabbix agent
+    when: zabbix_installed.rc != 0
+    shell: systemctl restart zabbix-agent && systemctl enable zabbix-agent

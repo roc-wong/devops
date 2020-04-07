@@ -1,5 +1,5 @@
 ---
-- hosts: condition-stress-test
+- hosts: rocketmq-stress-test
   gather_facts: no
   remote_user: root
   tasks:
@@ -11,4 +11,4 @@
       group: root
       mode: 0777
   - name: start jmeter server
-    shell: 'source /etc/profile && sh /root/start-jmeter.sh'
+    shell: 'source /etc/profile && sh /opt/start-jmeter.sh'

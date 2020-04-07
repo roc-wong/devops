@@ -1,0 +1,18 @@
+---
+- hosts: mico-service
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy update-daemon.json
+    copy:
+      src: /opt/roc/docker/daemon.json
+      dest: /etc/docker/daemon.json
+      owner: root
+      group: root
+      force: true
+
+  - name: restart docker
+    shell: systemctl daemon-reload && systemctl restart docker

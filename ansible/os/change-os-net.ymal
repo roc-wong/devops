@@ -1,0 +1,17 @@
+---
+- hosts: 10.29.183.63
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: Copy os-pref.sh to remote machine
+    copy:
+      src: /root/roc/ansible/playbook/os/os-pref.sh
+      dest: /root/os-pref.sh
+      owner: root
+      group: root
+      mode: 0777
+  - name: exec it
+    shell: sh /root/os-pref.sh 

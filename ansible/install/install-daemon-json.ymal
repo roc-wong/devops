@@ -1,0 +1,27 @@
+---
+- hosts: all-server
+  become: yes
+  become_user: root
+  become_method: su
+  gather_facts: no
+  remote_user: root
+  tasks:
+  - name: restart docker service
+    shell: systemctl restart docker
+
+  - name: Is docker daemon.json existed?
+    shell: test -e /etc/docker/daemon.json
+    register: daemon_file_existed
+    ignore_errors: True
+
+  - name: Copy daemon.json to /etc/docker/daemon.json.
+    when: daemon_file_existed.rc != 0
+    copy:
+      src: /etc/docker/daemon.json
+      dest: /etc/docker/daemon.json
+      owner: root
+      group: root
+      force: true
+
+  - name: restart docker service and login harbor
+    shell: systemctl restart docker
